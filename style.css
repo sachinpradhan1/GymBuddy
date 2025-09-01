@@ -640,3 +640,22 @@ body {
     height: 250px;
   }
 }
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 1rem;
+  color: var(--gray-100);
+  font-size: 0.875rem;
+}
+
+.footer a {
+  color: var(--white);
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer a:hover {
+  color: var(--primary);
+}
