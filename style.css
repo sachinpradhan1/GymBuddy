@@ -624,50 +624,31 @@ body {
 }
 
 /* Focus Mode Styles */
-body.focus-mode .header,
-body.focus-mode .sidebar,
-body.focus-mode .footer {
-  display: none;
+body.focus-mode .header {
+  transform: translateY(-100%);
+}
+body.focus-mode .sidebar {
+  transform: translateX(-110%);
+  opacity: 0;
 }
 
 body.focus-mode .main {
   grid-template-columns: 1fr;
-  max-width: 100%;
-  padding: 0;
-  gap: 0;
-  height: 100vh;
+  max-width: 100vw;
+  padding: 1rem;
 }
 
 body.focus-mode .workout-area {
-  height: 100%;
-  gap: 0;
-  position: relative;
+  height: calc(100vh - 100px); /* Full height minus some padding */
 }
 
 body.focus-mode .camera-section {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: 0;
-  padding: 1rem;
-  z-index: 5;
+  flex-grow: 1;
 }
 
 body.focus-mode .camera-container {
-  flex: 1;
-  min-height: 0;
-}
-
-body.focus-mode .feedback-panel {
-  position: absolute;
-  bottom: 1rem;
-  left: 1rem;
-  right: 1rem;
-  z-index: 10;
-  max-width: 500px;
-  margin: 0 auto;
+  min-height: 300px;
+  flex-grow: 1;
 }
 
 
