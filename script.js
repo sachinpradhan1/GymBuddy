@@ -1,4 +1,3 @@
-
 // Get all elements
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
@@ -32,16 +31,18 @@ let totalCalories = 0;
 let direction = "down";
 let camera = null;
 let currentExercise = "curl";
-let isActive = false;
+let workoutState = 'idle'; // 'idle', 'preparing', 'active'
+let readyTimeoutId = null;
 let targetReps = 20;
 let formScore = 100;
 
 // Demo video URLs for each exercise
 const demoVideos = {
   curl: "https://www.youtube.com/embed/ykJmrZ5v0Oo",
-  squat: "https://www.youtube.com/embed/aclHkVaku9U", 
+  squat: "https://www.youtube.com/embed/aclHkVaku9U",
   pushup: "https://www.youtube.com/embed/IODxDxX7oi4",
-  shoulderpress: "https://www.youtube.com/embed/qEwKCR5JCog"
+  shoulderpress: "https://www.youtube.com/embed/qEwKCR5JCog",
+  jumpingjack: "https://www.youtube.com/embed/c4DAnQ6DtF8"
 };
 
 // Exercise names and calorie values
@@ -49,7 +50,8 @@ const exerciseData = {
   curl: { name: "bicep curls", calories: 0.5 },
   squat: { name: "squats", calories: 0.8 },
   pushup: { name: "push-ups", calories: 0.7 },
-  shoulderpress: { name: "shoulder press", calories: 0.6 }
+  shoulderpress: { name: "shoulder press", calories: 0.6 },
+  jumpingjack: { name: "jumping jacks", calories: 0.9 }
 };
 
 // Exercise selection
@@ -111,36 +113,107 @@ pose.onResults((results) => {
   if (results.image) {
     ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
 
-    if (results.poseLandmarks && isActive) {
-      // Draw enhanced skeleton
-      drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS, {
-        color: "#6366f1",
-        lineWidth: 3
-      });
+    if (results.poseLandmarks) {
+      // Always draw skeleton if landmarks are detected
+      drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS, { color: "#6366f1", lineWidth: 3 });
+      drawLandmarks(ctx, results.poseLandmarks, { color: "#10b981", radius: 4 });
 
-      drawLandmarks(ctx, results.poseLandmarks, {
-        color: "#10b981",
-        radius: 4
-      });
-
-      // Update pose indicator
       poseIndicator.style.background = "rgba(16, 185, 129, 0.9)";
       poseIndicator.innerHTML = '<i class="fas fa-user-check"></i>';
 
-      // Exercise logic
-      processExercise(results.poseLandmarks);
-    } else if (isActive) {
+      if (workoutState === 'preparing') {
+        checkReadyState(results.poseLandmarks);
+      } else if (workoutState === 'active') {
+        processExercise(results.poseLandmarks);
+      }
+    } else {
       poseIndicator.style.background = "rgba(239, 68, 68, 0.9)";
       poseIndicator.innerHTML = '<i class="fas fa-user-slash"></i>';
+      if (workoutState !== 'idle') {
+        updateFeedback("No Person Detected", "Please step into camera view", "fas fa-exclamation-triangle");
+        if (workoutState === 'preparing' && readyTimeoutId) {
+          clearTimeout(readyTimeoutId);
+          readyTimeoutId = null;
+        }
+      }
     }
   }
-
-  if (!results.poseLandmarks && isActive) {
-    updateFeedback("No Person Detected", "Please step into camera view", "fas fa-exclamation-triangle");
-    formScore = Math.max(50, formScore - 1);
-    updateStats();
-  }
 });
+
+function checkReadyState(landmarks) {
+  const lm = landmarks;
+  let startPoseCorrect = false;
+  let feedbackMessage = "";
+
+  switch (currentExercise) {
+    case "curl":
+      const curlAngle = calculateAngle(lm[11], lm[13], lm[15]);
+      if (curlAngle > 160) {
+        startPoseCorrect = true;
+        feedbackMessage = "Hold this position to begin.";
+      } else {
+        feedbackMessage = "Stand straight with arms down to begin.";
+      }
+      break;
+    case "squat":
+      const squatAngle = calculateAngle(lm[23], lm[25], lm[27]);
+      if (squatAngle > 160) {
+        startPoseCorrect = true;
+        feedbackMessage = "Hold this position to begin.";
+      } else {
+        feedbackMessage = "Stand up straight to begin.";
+      }
+      break;
+    case "pushup":
+      const bodyAngle = calculateAngle(lm[11], lm[23], lm[25]);
+      const armAngle = calculateAngle(lm[11], lm[13], lm[15]);
+      if (bodyAngle > 160 && armAngle > 160) {
+        startPoseCorrect = true;
+        feedbackMessage = "Hold this plank position to begin.";
+      } else {
+        feedbackMessage = "Get into a straight-arm plank position.";
+      }
+      break;
+    case "shoulderpress":
+      const spArmAngle = calculateAngle(lm[11], lm[13], lm[15]);
+      if (spArmAngle > 160) {
+        startPoseCorrect = true;
+        feedbackMessage = "Hold this position with arms down to begin.";
+      } else {
+        feedbackMessage = "Stand with your arms down to begin.";
+      }
+      break;
+    case "jumpingjack":
+      const jjShoulderAngle = calculateAngle(lm[13], lm[11], lm[23]);
+      if (jjShoulderAngle < 45) { // Arms down by side
+        startPoseCorrect = true;
+        feedbackMessage = "Hold this position to begin.";
+      } else {
+        feedbackMessage = "Stand with your arms down by your sides.";
+      }
+      break;
+  }
+
+  if (startPoseCorrect) {
+    if (!readyTimeoutId) {
+      updateFeedback("Ready!", "Hold this position to start the workout.", "fas fa-check-circle");
+      speak("Hold this position to begin.");
+      readyTimeoutId = setTimeout(() => {
+        workoutState = 'active';
+        const exerciseName = exerciseData[currentExercise].name;
+        updateFeedback("Workout Started!", `Let's go! First rep of ${exerciseName}!`, "fas fa-play-circle");
+        speak(`Workout started! Let's go!`);
+        readyTimeoutId = null;
+      }, 2000); // 2-second hold to start
+    }
+  } else {
+    if (readyTimeoutId) {
+      clearTimeout(readyTimeoutId);
+      readyTimeoutId = null;
+    }
+    updateFeedback("Get Ready", feedbackMessage, "fas fa-user-clock");
+  }
+}
 
 function processExercise(landmarks) {
   const lm = landmarks;
@@ -163,7 +236,6 @@ function processExercise(landmarks) {
       direction = "up";
       incrementRep();
       updateFeedback("Excellent Curl!", "Perfect bicep contraction!", "fas fa-check-circle");
-      speak(getEncouragementMessage());
     }
 
     if (elbow.y > shoulder.y - 0.1) {
@@ -189,7 +261,6 @@ function processExercise(landmarks) {
       direction = "up";
       incrementRep();
       updateFeedback("Perfect Squat!", "Excellent depth and form!", "fas fa-check-circle");
-      speak(getEncouragementMessage());
     }
 
     if (angle > 120 && direction === "down") {
@@ -202,10 +273,10 @@ function processExercise(landmarks) {
     const elbow = lm[13];
     const wrist = lm[15];
     const hip = lm[23];
-    
+
     const elbowAngle = calculateAngle(shoulder, elbow, wrist);
     const bodyAlignment = Math.abs(shoulder.y - hip.y);
-    
+
     if (elbowAngle < 140 && elbowAngle > 60 && bodyAlignment < 0.2) {
       updateFeedback("Performing Push-up", `Excellent form! Depth: ${Math.round(elbowAngle)}°`, "fas fa-hand-point-up");
       formScore = Math.min(100, formScore + 0.5);
@@ -218,7 +289,6 @@ function processExercise(landmarks) {
       direction = "up";
       incrementRep();
       updateFeedback("Amazing Push-up!", "Perfect chest engagement!", "fas fa-check-circle");
-      speak(getEncouragementMessage());
     }
 
     if (bodyAlignment > 0.3) {
@@ -230,11 +300,11 @@ function processExercise(landmarks) {
     const shoulder = lm[11];
     const elbow = lm[13];
     const wrist = lm[15];
-    
+
     // Calculate angle for shoulder press (elbow to shoulder to hip)
     const hip = lm[23];
     const shoulderAngle = calculateAngle(elbow, shoulder, hip);
-    
+
     // Also check arm extension (shoulder to elbow to wrist)
     const armAngle = calculateAngle(shoulder, elbow, wrist);
 
@@ -250,12 +320,36 @@ function processExercise(landmarks) {
       direction = "up";
       incrementRep();
       updateFeedback("Perfect Press!", "Excellent shoulder strength!", "fas fa-check-circle");
-      speak(getEncouragementMessage());
     }
 
     if (shoulderAngle < 45) {
       updateFeedback("Form Check", "Lift your arms higher!", "fas fa-arrow-up");
       formScore = Math.max(70, formScore - 0.5);
+    }
+  } else if (currentExercise === "jumpingjack") {
+    const leftShoulder = lm[11];
+    const rightShoulder = lm[12];
+    const leftHip = lm[23];
+    const rightHip = lm[24];
+    const leftAnkle = lm[27];
+    const rightAnkle = lm[28];
+
+    const leftShoulderAngle = calculateAngle(lm[13], leftShoulder, leftHip);
+    const rightShoulderAngle = calculateAngle(lm[14], rightShoulder, rightHip);
+
+    const feetDistance = Math.abs(leftAnkle.x - rightAnkle.x);
+    const shoulderWidth = Math.abs(leftShoulder.x - rightShoulder.x);
+
+    // Arms are up and feet are apart
+    if (leftShoulderAngle > 130 && rightShoulderAngle > 130 && feetDistance > shoulderWidth * 1.5 && direction === "down") {
+      direction = "up"; // "up" state for jumping jacks means arms are up
+    }
+
+    // Arms are down and feet are together
+    if (leftShoulderAngle < 45 && rightShoulderAngle < 45 && feetDistance < shoulderWidth * 1.2 && direction === "up") {
+      direction = "down";
+      incrementRep();
+      updateFeedback("Great Jack!", "Keep the rhythm!", "fas fa-star");
     }
   }
 
@@ -274,12 +368,17 @@ function incrementRep() {
   const caloriesPerRep = exerciseData[currentExercise].calories;
   sessionCalories += caloriesPerRep;
   totalCalories += caloriesPerRep;
-  
+
   // Add rep animation
   currentRepsElement.parentElement.classList.add('rep-animation');
   setTimeout(() => {
     currentRepsElement.parentElement.classList.remove('rep-animation');
   }, 400);
+
+  // Speak encouragement message every 5 reps
+  if (repCount > 0 && repCount % 5 === 0) {
+    speak(`${repCount} reps! ${getEncouragementMessage()}`);
+  }
 }
 
 function getEncouragementMessage() {
@@ -319,7 +418,7 @@ function updateFeedback(title, message, iconClass) {
   feedbackTitleElement.textContent = title;
   feedbackMessageElement.textContent = message;
   feedbackIconElement.innerHTML = `<i class="${iconClass}"></i>`;
-  
+
   // Update icon color based on feedback type
   if (iconClass.includes('check') || iconClass.includes('trophy')) {
     feedbackIconElement.style.background = "linear-gradient(135deg, var(--success), #059669)";
@@ -335,6 +434,12 @@ function resetSession() {
   sessionCalories = 0;
   direction = "down";
   formScore = 100;
+  if (readyTimeoutId) {
+    clearTimeout(readyTimeoutId);
+    readyTimeoutId = null;
+  }
+  // If camera is running, go to preparing state, else idle
+  workoutState = camera ? 'preparing' : 'idle';
   updateStats();
 }
 
@@ -352,7 +457,7 @@ function startWorkoutFlow() {
 function startCamera() {
   if (camera) return;
 
-  isActive = true;
+  workoutState = 'preparing';
   startButton.disabled = true;
   stopButton.disabled = false;
   startButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Starting...</span>';
@@ -369,15 +474,15 @@ function startCamera() {
 
   camera.start().then(() => {
     const exerciseName = exerciseData[currentExercise].name;
-    updateFeedback("Ready to Exercise", "Start your first rep!", "fas fa-play");
-    speak(`Perfect! Camera is ready! Let's begin your ${exerciseName} workout. Remember the form you just saw and let's get started!`);
+    updateFeedback("Get Ready", `Prepare for ${exerciseName}.`, "fas fa-user-clock");
+    speak(`Camera is ready. Get into position for ${exerciseName}.`);
     startButton.innerHTML = '<i class="fas fa-play"></i><span>Start Workout</span>';
   }).catch((error) => {
     console.error("Failed to acquire camera feed:", error);
     updateFeedback("Camera Error", "Please allow camera access", "fas fa-exclamation-triangle");
     speak("I need camera access to track your workout. Please allow camera permission and try again.");
-    
-    isActive = false;
+
+    workoutState = 'idle';
     startButton.disabled = false;
     stopButton.disabled = true;
     startButton.innerHTML = '<i class="fas fa-play"></i><span>Start Workout</span>';
@@ -387,7 +492,11 @@ function startCamera() {
 function stopCamera() {
   if (!camera) return;
 
-  isActive = false;
+  workoutState = 'idle';
+  if (readyTimeoutId) {
+    clearTimeout(readyTimeoutId);
+    readyTimeoutId = null;
+  }
   startButton.disabled = false;
   stopButton.disabled = true;
 
@@ -395,15 +504,15 @@ function stopCamera() {
     camera.stop();
   }
   camera = null;
-  
+
   if (video.srcObject) {
     const tracks = video.srcObject.getTracks();
     tracks.forEach(track => track.stop());
     video.srcObject = null;
   }
-  
+
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
+
   // Reset pose indicator
   poseIndicator.style.background = "rgba(107, 114, 128, 0.9)";
   poseIndicator.innerHTML = '<i class="fas fa-user"></i>';
@@ -421,19 +530,19 @@ function speak(text) {
     utter.volume = 0.9;
     utter.rate = 0.85;
     utter.pitch = 1.1;
-    
+
     // Try to use a more expressive voice
     const voices = window.speechSynthesis.getVoices();
-    const preferredVoice = voices.find(voice => 
-      voice.name.includes('Google') || 
-      voice.name.includes('Enhanced') || 
+    const preferredVoice = voices.find(voice =>
+      voice.name.includes('Google') ||
+      voice.name.includes('Enhanced') ||
       voice.name.includes('Premium') ||
       voice.name.includes('Neural')
     );
     if (preferredVoice) {
       utter.voice = preferredVoice;
     }
-    
+
     window.speechSynthesis.speak(utter);
   }
 }
