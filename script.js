@@ -24,6 +24,7 @@ const skipDemoBtn = document.getElementById("skip-demo");
 const poseIndicator = document.getElementById("pose-indicator");
 const focusModeBtn = document.getElementById("focus-mode-btn");
 const themeToggleBtn = document.getElementById("theme-toggle-btn");
+const muteBtn = document.getElementById("mute-btn");
 
 // Variables for rep counting
 let repCount = 0;
@@ -40,6 +41,7 @@ let resumeTimeoutId = null;
 let resumeCountdown = 3;
 let targetReps = 20;
 let formScore = 100;
+let isMuted = false;
 
 // Demo video URLs for each exercise
 const demoVideos = {
@@ -565,28 +567,28 @@ function stopCamera() {
 }
 
 function speak(text) {
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = 'en-US';
-    utter.volume = 0.9;
-    utter.rate = 0.85;
-    utter.pitch = 1.1;
+  if (isMuted || !('speechSynthesis' in window)) return;
 
-    // Try to use a more expressive voice
-    const voices = window.speechSynthesis.getVoices();
-    const preferredVoice = voices.find(voice =>
-      voice.name.includes('Google') ||
-      voice.name.includes('Enhanced') ||
-      voice.name.includes('Premium') ||
-      voice.name.includes('Neural')
-    );
-    if (preferredVoice) {
-      utter.voice = preferredVoice;
-    }
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'en-US';
+  utter.volume = 0.9;
+  utter.rate = 0.85;
+  utter.pitch = 1.1;
 
-    window.speechSynthesis.speak(utter);
+  // Try to use a more expressive voice
+  const voices = window.speechSynthesis.getVoices();
+  const preferredVoice = voices.find(voice =>
+    voice.name.includes('Google') ||
+    voice.name.includes('Enhanced') ||
+    voice.name.includes('Premium') ||
+    voice.name.includes('Neural')
+  );
+  if (preferredVoice) {
+    utter.voice = preferredVoice;
   }
+
+  window.speechSynthesis.speak(utter);
 }
 
 // Event listeners
@@ -619,6 +621,19 @@ themeToggleBtn.addEventListener('click', () => {
   }
 });
 
+muteBtn.addEventListener('click', () => {
+  isMuted = !isMuted;
+  localStorage.setItem('muted', isMuted);
+  const icon = muteBtn.querySelector('i');
+  if (isMuted) {
+    icon.classList.remove('fa-volume-up');
+    icon.classList.add('fa-volume-mute');
+  } else {
+    icon.classList.remove('fa-volume-mute');
+    icon.classList.add('fa-volume-up');
+  }
+});
+
 // Initialize voices when available
 if (window.speechSynthesis) {
   window.speechSynthesis.onvoiceschanged = () => {
@@ -636,6 +651,14 @@ if (savedTheme === 'dark') {
   document.body.classList.add('dark-mode');
   themeToggleBtn.querySelector('i').classList.remove('fa-moon');
   themeToggleBtn.querySelector('i').classList.add('fa-sun');
+}
+
+// Load saved mute state from localStorage
+const savedMuteState = localStorage.getItem('muted');
+if (savedMuteState === 'true') {
+  isMuted = true;
+  muteBtn.querySelector('i').classList.remove('fa-volume-up');
+  muteBtn.querySelector('i').classList.add('fa-volume-mute');
 }
 
 // Load saved stats from localStorage
