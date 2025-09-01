@@ -623,11 +623,12 @@ themeToggleBtn.addEventListener('click', () => {
 
 muteBtn.addEventListener('click', () => {
   isMuted = !isMuted;
-  localStorage.setItem('muted', isMuted);
+  localStorage.setItem('muted', isMuted ? 'true' : 'false');
   const icon = muteBtn.querySelector('i');
   if (isMuted) {
     icon.classList.remove('fa-volume-up');
     icon.classList.add('fa-volume-mute');
+    window.speechSynthesis.cancel();
   } else {
     icon.classList.remove('fa-volume-mute');
     icon.classList.add('fa-volume-up');

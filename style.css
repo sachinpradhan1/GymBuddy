@@ -624,10 +624,7 @@ body {
 }
 
 /* Focus Mode Styles */
-body.focus-mode .header {
-  transform: translateY(-100%);
-}
-
+body.focus-mode .header,
 body.focus-mode .sidebar,
 body.focus-mode .footer {
   display: none;
@@ -644,12 +641,18 @@ body.focus-mode .main {
 body.focus-mode .workout-area {
   height: 100%;
   gap: 0;
+  position: relative;
 }
 
 body.focus-mode .camera-section {
-  flex: 1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   border-radius: 0;
   padding: 1rem;
+  z-index: 5;
 }
 
 body.focus-mode .camera-container {
