@@ -23,15 +23,20 @@
             <span>Personal Trainer</span>
           </div>
         </div>
-        <div class="header-stats">
-          <div class="stat-item">
-            <span class="stat-value" id="total-reps">0</span>
-            <span class="stat-label">Total Reps</span>
+        <div class="header-controls">
+          <div class="header-stats">
+            <div class="stat-item">
+              <span class="stat-value" id="total-reps">0</span>
+              <span class="stat-label">Total Reps</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value" id="total-calories">0</span>
+              <span class="stat-label">Calories</span>
+            </div>
           </div>
-          <div class="stat-item">
-            <span class="stat-value" id="total-calories">0</span>
-            <span class="stat-label">Calories</span>
-          </div>
+          <button class="btn-icon" id="theme-toggle-btn" title="Toggle Theme">
+            <i class="fas fa-moon"></i>
+          </button>
         </div>
       </div>
     </header>
@@ -117,6 +122,12 @@
       <section class="workout-area">
         <!-- Camera Feed -->
         <div class="camera-section">
+          <div class="camera-header">
+            <h3>Live Workout</h3>
+            <button class="btn-icon" id="focus-mode-btn" title="Focus Mode">
+              <i class="fas fa-expand"></i>
+            </button>
+          </div>
           <div class="camera-container">
             <video id="video"></video>
             <canvas id="canvas"></canvas>

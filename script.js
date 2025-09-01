@@ -22,6 +22,8 @@ const closeDemoBtn = document.getElementById("close-demo");
 const startAfterDemoBtn = document.getElementById("start-after-demo");
 const skipDemoBtn = document.getElementById("skip-demo");
 const poseIndicator = document.getElementById("pose-indicator");
+const focusModeBtn = document.getElementById("focus-mode-btn");
+const themeToggleBtn = document.getElementById("theme-toggle-btn");
 
 // Variables for rep counting
 let repCount = 0;
@@ -31,8 +33,11 @@ let totalCalories = 0;
 let direction = "down";
 let camera = null;
 let currentExercise = "curl";
-let workoutState = 'idle'; // 'idle', 'preparing', 'active'
+let workoutState = 'idle'; // 'idle', 'preparing', 'active', 'paused', 'resuming'
 let readyTimeoutId = null;
+let pauseTimeoutId = null;
+let resumeTimeoutId = null;
+let resumeCountdown = 3;
 let targetReps = 20;
 let formScore = 100;
 
@@ -57,6 +62,7 @@ const exerciseData = {
 // Exercise selection
 exerciseCards.forEach(card => {
   card.addEventListener('click', () => {
+    if (workoutState !== 'idle') return;
     exerciseCards.forEach(c => c.classList.remove('active'));
     card.classList.add('active');
     currentExercise = card.dataset.exercise;
@@ -114,9 +120,14 @@ pose.onResults((results) => {
     ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
 
     if (results.poseLandmarks) {
+      if (pauseTimeoutId) {
+        clearTimeout(pauseTimeoutId);
+        pauseTimeoutId = null;
+      }
+
       // Always draw skeleton if landmarks are detected
-      drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS, { color: "#6366f1", lineWidth: 3 });
-      drawLandmarks(ctx, results.poseLandmarks, { color: "#10b981", radius: 4 });
+      drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS, { color: "var(--primary)", lineWidth: 3 });
+      drawLandmarks(ctx, results.poseLandmarks, { color: "var(--success)", radius: 4 });
 
       poseIndicator.style.background = "rgba(16, 185, 129, 0.9)";
       poseIndicator.innerHTML = '<i class="fas fa-user-check"></i>';
@@ -125,20 +136,45 @@ pose.onResults((results) => {
         checkReadyState(results.poseLandmarks);
       } else if (workoutState === 'active') {
         processExercise(results.poseLandmarks);
+      } else if (workoutState === 'paused') {
+        resumeWorkout();
       }
     } else {
       poseIndicator.style.background = "rgba(239, 68, 68, 0.9)";
       poseIndicator.innerHTML = '<i class="fas fa-user-slash"></i>';
-      if (workoutState !== 'idle') {
-        updateFeedback("No Person Detected", "Please step into camera view", "fas fa-exclamation-triangle");
-        if (workoutState === 'preparing' && readyTimeoutId) {
-          clearTimeout(readyTimeoutId);
-          readyTimeoutId = null;
-        }
+
+      if (workoutState === 'active' && !pauseTimeoutId) {
+        pauseTimeoutId = setTimeout(() => {
+          workoutState = 'paused';
+          updateFeedback("Workout Paused", "Step back in front of the camera to resume", "fas fa-pause-circle");
+          speak("Workout paused.");
+        }, 3000); // 3 seconds to pause
       }
     }
   }
 });
+
+function resumeWorkout() {
+  if (workoutState !== 'paused') return;
+
+  workoutState = 'resuming';
+  let countdown = 3;
+
+  const doResumeCountdown = () => {
+    if (countdown > 0) {
+      updateFeedback("Resuming...", `Get ready to continue in ${countdown}`, "fas fa-play-circle");
+      speak(countdown);
+      countdown--;
+      resumeTimeoutId = setTimeout(doResumeCountdown, 1000);
+    } else {
+      workoutState = 'active';
+      updateFeedback("Workout Resumed", "Let's keep going!", "fas fa-play");
+      speak("Let's go!");
+    }
+  };
+
+  doResumeCountdown();
+}
 
 function checkReadyState(landmarks) {
   const lm = landmarks;
@@ -434,11 +470,14 @@ function resetSession() {
   sessionCalories = 0;
   direction = "down";
   formScore = 100;
-  if (readyTimeoutId) {
-    clearTimeout(readyTimeoutId);
-    readyTimeoutId = null;
-  }
-  // If camera is running, go to preparing state, else idle
+
+  clearTimeout(readyTimeoutId);
+  clearTimeout(pauseTimeoutId);
+  clearTimeout(resumeTimeoutId);
+  readyTimeoutId = null;
+  pauseTimeoutId = null;
+  resumeTimeoutId = null;
+
   workoutState = camera ? 'preparing' : 'idle';
   updateStats();
 }
@@ -493,10 +532,13 @@ function stopCamera() {
   if (!camera) return;
 
   workoutState = 'idle';
-  if (readyTimeoutId) {
-    clearTimeout(readyTimeoutId);
-    readyTimeoutId = null;
-  }
+  clearTimeout(readyTimeoutId);
+  clearTimeout(pauseTimeoutId);
+  clearTimeout(resumeTimeoutId);
+  readyTimeoutId = null;
+  pauseTimeoutId = null;
+  resumeTimeoutId = null;
+
   startButton.disabled = false;
   stopButton.disabled = true;
 
@@ -551,6 +593,32 @@ function speak(text) {
 startButton.addEventListener('click', startWorkoutFlow);
 stopButton.addEventListener('click', stopCamera);
 
+focusModeBtn.addEventListener('click', () => {
+  document.body.classList.toggle('focus-mode');
+  const icon = focusModeBtn.querySelector('i');
+  if (document.body.classList.contains('focus-mode')) {
+    icon.classList.remove('fa-expand');
+    icon.classList.add('fa-compress');
+  } else {
+    icon.classList.remove('fa-compress');
+    icon.classList.add('fa-expand');
+  }
+});
+
+themeToggleBtn.addEventListener('click', () => {
+  document.body.classList.toggle('dark-mode');
+  const isDarkMode = document.body.classList.contains('dark-mode');
+  localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+  const icon = themeToggleBtn.querySelector('i');
+  if (isDarkMode) {
+    icon.classList.remove('fa-moon');
+    icon.classList.add('fa-sun');
+  } else {
+    icon.classList.remove('fa-sun');
+    icon.classList.add('fa-moon');
+  }
+});
+
 // Initialize voices when available
 if (window.speechSynthesis) {
   window.speechSynthesis.onvoiceschanged = () => {
@@ -561,6 +629,14 @@ if (window.speechSynthesis) {
 // Initialize
 updateFeedback("Welcome to FitTracker AI", "Choose an exercise and start your journey!", "fas fa-rocket");
 speak("Welcome to FitTracker AI! Your personal trainer is ready to help you achieve your fitness goals! Choose an exercise and let's get started!");
+
+// Load saved theme from localStorage
+const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+if (savedTheme === 'dark') {
+  document.body.classList.add('dark-mode');
+  themeToggleBtn.querySelector('i').classList.remove('fa-moon');
+  themeToggleBtn.querySelector('i').classList.add('fa-sun');
+}
 
 // Load saved stats from localStorage
 const savedStats = localStorage.getItem('fittracker-stats');
