@@ -666,8 +666,17 @@ body.focus-mode .camera-container {
 /* Responsive Design */
 @media (max-width: 1024px) {
   .main {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
     padding: 1rem;
+  }
+
+  .workout-area {
+    order: 1;
+  }
+
+  .sidebar {
+    order: 2;
   }
 
   .camera-container {
@@ -699,7 +708,7 @@ body.focus-mode .camera-container {
   }
 
   .camera-container {
-    height: 300px;
+    height: 450px;
   }
 
   .live-stats {
@@ -735,7 +744,7 @@ body.focus-mode .camera-container {
   }
 
   .camera-container {
-    height: 250px;
+    height: 400px;
   }
 }
 
