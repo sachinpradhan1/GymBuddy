@@ -498,6 +498,17 @@ body {
   transform: translateY(-1px);
 }
 
+.btn-warning {
+  background: linear-gradient(135deg, var(--warning), #d97706);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.btn-warning:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;

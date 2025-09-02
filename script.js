@@ -14,6 +14,7 @@ const feedbackMessageElement = document.getElementById("feedback-message");
 const feedbackIconElement = document.getElementById("feedback-icon");
 const startButton = document.getElementById("start-btn");
 const stopButton = document.getElementById("stop-btn");
+const resetButton = document.getElementById("reset-reps-btn");
 const exerciseCards = document.querySelectorAll('.exercise-card');
 const demoModal = document.getElementById("demo-modal");
 const demoVideo = document.getElementById("demo-video");
@@ -491,6 +492,14 @@ function resetAll() {
   updateStats();
 }
 
+function resetReps() {
+    repCount = 0;
+    sessionCalories = 0;
+    updateStats();
+    updateFeedback("Rep Count Reset", "Your reps for this session have been cleared.", "fas fa-undo");
+    speak("Rep count reset.");
+}
+
 function startWorkoutFlow() {
   showDemoModal();
 }
@@ -501,6 +510,7 @@ function startCamera() {
   workoutState = 'preparing';
   startButton.disabled = true;
   stopButton.disabled = false;
+  resetButton.disabled = false;
   startButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Starting...</span>';
 
   updateFeedback("Initializing Camera", "Getting your workout ready...", "fas fa-camera");
@@ -543,6 +553,7 @@ function stopCamera() {
 
   startButton.disabled = false;
   stopButton.disabled = true;
+  resetButton.disabled = true;
 
   if (camera.stop) {
     camera.stop();
@@ -594,6 +605,7 @@ function speak(text) {
 // Event listeners
 startButton.addEventListener('click', startWorkoutFlow);
 stopButton.addEventListener('click', stopCamera);
+resetButton.addEventListener('click', resetReps);
 
 focusModeBtn.addEventListener('click', () => {
   document.body.classList.toggle('focus-mode');
