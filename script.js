@@ -26,6 +26,7 @@ const poseIndicator = document.getElementById("pose-indicator");
 const focusModeBtn = document.getElementById("focus-mode-btn");
 const themeToggleBtn = document.getElementById("theme-toggle-btn");
 const muteBtn = document.getElementById("mute-btn");
+const appElement = document.querySelector('.app');
 
 // Variables for rep counting
 let repCount = 0;
@@ -602,6 +603,27 @@ function speak(text) {
   window.speechSynthesis.speak(utter);
 }
 
+// Fullscreen API functions
+function openFullscreen(elem) {
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.webkitRequestFullscreen) { /* Safari */
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) { /* IE11 */
+    elem.msRequestFullscreen();
+  }
+}
+
+function closeFullscreen() {
+  if (document.exitFullscreen) {
+    document.exitFullscreen();
+  } else if (document.webkitExitFullscreen) { /* Safari */
+    document.webkitExitFullscreen();
+  } else if (document.msExitFullscreen) { /* IE11 */
+    document.msExitFullscreen();
+  }
+}
+
 // Event listeners
 startButton.addEventListener('click', startWorkoutFlow);
 stopButton.addEventListener('click', stopCamera);
@@ -610,10 +632,13 @@ resetButton.addEventListener('click', resetReps);
 focusModeBtn.addEventListener('click', () => {
   document.body.classList.toggle('focus-mode');
   const icon = focusModeBtn.querySelector('i');
+
   if (document.body.classList.contains('focus-mode')) {
+    openFullscreen(appElement);
     icon.classList.remove('fa-expand');
     icon.classList.add('fa-compress');
   } else {
+    closeFullscreen();
     icon.classList.remove('fa-compress');
     icon.classList.add('fa-expand');
   }
