@@ -90,6 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeTheme();
     initializeMuteState();
     initializeStats();
+    resetSession(); // Initialize the default exercise state
 
     updateFeedback("Welcome to FitTracker AI", "Choose an exercise and start your journey!", "fas fa-rocket");
     speak("Welcome to FitTracker AI! Your personal trainer is ready to help you achieve your fitness goals! Choose an exercise and let's get started!");
