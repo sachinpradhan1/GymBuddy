@@ -73,16 +73,14 @@ const demoVideos = {
   curl: "https://www.youtube.com/embed/ykJmrZ5v0Oo",
   squat: "https://www.youtube.com/embed/aclHkVaku9U",
   pushup: "https://www.youtube.com/embed/IODxDxX7oi4",
-  shoulderpress: "https://www.youtube.com/embed/qEwKCR5JCog",
-  jumpingjack: "https://www.youtube.com/embed/c4DAnQ6DtF8"
+  shoulderpress: "https://www.youtube.com/embed/qEwKCR5JCog"
 };
 
 const exerciseData = {
   curl: { name: "bicep curls", calories: 0.5 },
   squat: { name: "squats", calories: 0.8 },
-  pushup: { name: "push-ups", calories: 0.7 },
-  shoulderpress: { name: "shoulder press", calories: 0.6 },
-  jumpingjack: { name: "jumping jacks", calories: 0.9 }
+  pushup: { name: "push up", calories: 0.7 },
+  shoulderpress: { name: "shoulder press", calories: 0.6 }
 };
 
 // ---
@@ -225,7 +223,6 @@ function processExercise(landmarks) {
     case "squat": processSquat(landmarks); break;
     case "pushup": processPushup(landmarks); break;
     case "shoulderpress": processShoulderPress(landmarks); break;
-    case "jumpingjack": processJumpingJack(landmarks); break;
   }
   updateStats();
 }
@@ -262,10 +259,10 @@ function processBicepCurl(lm) {
 function processShoulderPress(lm) {
   const leftAngle = smoothAngle(calculateAngle(lm[11], lm[13], lm[15]), 'left');
   const rightAngle = smoothAngle(calculateAngle(lm[12], lm[14], lm[16]), 'right');
+  const avgAngle = (leftAngle + rightAngle) / 2;
 
-  // For shoulder press, a rep is counted on the DOWNWARD motion (from up to down)
-  detectRep({ angle: leftAngle, phase: 'up', minAngle: 80, maxAngle: 160 }, 'left');
-  detectRep({ angle: rightAngle, phase: 'up', minAngle: 80, maxAngle: 160 }, 'right');
+  // Use average of both arms to count rep only once
+  detectRep({ angle: avgAngle, phase: 'up', minAngle: 80, maxAngle: 160 }, 'main');
 
   updateFeedback("Shoulder Press", `L: ${Math.round(leftAngle)}° R: ${Math.round(rightAngle)}°`, "fas fa-angle-up");
 }
@@ -288,22 +285,6 @@ function processPushup(lm) {
     updateFeedback("Push-up", `Depth: ${Math.round(avgAngle)}°`, "fas fa-hand-point-up");
 }
 
-function processJumpingJack(lm) {
-    const leftShoulderAngle = calculateAngle(lm[13], lm[11], lm[23]);
-    const feetDistance = Math.abs(lm[27].x - lm[28].x);
-    const shoulderWidth = Math.abs(lm[11].x - lm[12].x);
-
-    const state = (leftShoulderAngle > 130 && feetDistance > shoulderWidth * 1.5) ? 'open' : 'closed';
-    const phase = exercisePhase.main;
-
-    if (phase.state === 'closed' && state === 'open') {
-        phase.state = 'open';
-    } else if (phase.state === 'open' && state === 'closed') {
-        phase.state = 'closed';
-        incrementRep();
-    }
-    updateFeedback("Jumping Jack", "Keep up the energy!", "fas fa-star");
-}
 
 /**
  * Generic Rep Detection Logic.
@@ -431,7 +412,7 @@ function resetSession() {
   exercisePhase = {
     left: { phase: currentExercise === 'shoulderpress' ? 'up' : 'down' },
     right: { phase: currentExercise === 'shoulderpress' ? 'up' : 'down' },
-    main: { phase: 'down', state: 'closed' } // For squat/pushup and jumping jacks
+    main: { phase: currentExercise === 'shoulderpress' ? 'up' : 'down', state: 'closed' } // For squat/pushup/shoulderpress
   };
 
   clearTimeout(readyTimeoutId);
