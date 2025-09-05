@@ -10,6 +10,9 @@ let workoutState = 'idle'; // 'idle', 'preparing', 'active', 'paused', 'resuming
 let targetReps = DEFAULT_TARGET_REPS;
 let calorieGoal = DEFAULT_CALORIE_GOAL;
 let formScore = 100;
+let repsPerSet = 10;
+let numberOfSets = 3;
+let currentSet = 1;
 
 // UI state
 let isMuted = false;
@@ -51,6 +54,9 @@ export const getWorkoutState = () => workoutState;
 export const getTargetReps = () => targetReps;
 export const getCalorieGoal = () => calorieGoal;
 export const getFormScore = () => formScore;
+export const getRepsPerSet = () => repsPerSet;
+export const getNumberOfSets = () => numberOfSets;
+export const getCurrentSet = () => currentSet;
 export const getIsMuted = () => isMuted;
 export const getIsFocusMode = () => isFocusMode;
 export const getCamera = () => camera;
@@ -70,6 +76,9 @@ export const setWorkoutState = (value) => { workoutState = value; };
 export const setTargetReps = (value) => { targetReps = value; };
 export const setCalorieGoal = (value) => { calorieGoal = value; };
 export const setFormScore = (value) => { formScore = value; };
+export const setRepsPerSet = (value) => { repsPerSet = value; };
+export const setNumberOfSets = (value) => { numberOfSets = value; };
+export const setCurrentSet = (value) => { currentSet = value; };
 export const setIsMuted = (value) => { isMuted = value; };
 export const setIsFocusMode = (value) => { isFocusMode = value; };
 export const setCamera = (value) => { camera = value; };

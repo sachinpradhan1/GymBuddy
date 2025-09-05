@@ -22,11 +22,43 @@ import {
 
 import { demoVideos, exerciseData } from './constants.js';
 import { speak } from './utils.js';
-import { updateStats } from './ui.js';
+import { updateStats, updateFeedback } from './ui.js';
+import { setReadyTimeoutId } from './state.js';
+import { startCamera } from './camera.js';
 
 // Start workout flow with demo
 export function startWorkoutFlow() {
   showDemoModal();
+}
+
+// Start the workout after the demo or skip
+export function startWorkout() {
+  closeDemoModal();
+  startCountdown();
+}
+
+// 5-second countdown
+function startCountdown() {
+  setWorkoutState('preparing');
+  updateFeedback("Get Ready!", "Workout starting soon...", "fas fa-hourglass-start");
+
+  let count = 5;
+
+  const countdownInterval = setInterval(() => {
+    if (count > 0) {
+      updateFeedback(`Get Ready! ${count}`, "Prepare your form", "fas fa-stopwatch");
+      speak(String(count));
+      count--;
+    } else {
+      clearInterval(countdownInterval);
+      setWorkoutState('active');
+      updateFeedback("Go!", "Your workout has started!", "fas fa-play-circle");
+      speak("Start!");
+      startCamera();
+    }
+  }, 1000);
+
+  setReadyTimeoutId(countdownInterval);
 }
 
 // Show demo modal

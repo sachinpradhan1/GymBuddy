@@ -2,16 +2,16 @@ import {
   settingsBtn,
   settingsModal,
   closeSettingsBtn,
-  targetRepsInput,
-  calorieGoalInput,
+  repsPerSetInput,
+  numberOfSetsInput,
   saveSettingsBtn
 } from './elements.js';
 
 import {
-  getTargetReps,
-  getCalorieGoal,
-  setTargetReps,
-  setCalorieGoal
+  getRepsPerSet,
+  getNumberOfSets,
+  setRepsPerSet,
+  setNumberOfSets
 } from './state.js';
 
 import { updateStats, saveStats } from './ui.js';
@@ -34,11 +34,11 @@ export function hideSettingsModal() {
 
 // Load current settings into form
 function loadCurrentSettings() {
-  if (targetRepsInput) {
-    targetRepsInput.value = getTargetReps();
+  if (repsPerSetInput) {
+    repsPerSetInput.value = getRepsPerSet();
   }
-  if (calorieGoalInput) {
-    calorieGoalInput.value = getCalorieGoal();
+  if (numberOfSetsInput) {
+    numberOfSetsInput.value = getNumberOfSets();
   }
 }
 
@@ -46,18 +46,18 @@ function loadCurrentSettings() {
 export function saveSettings() {
   let updated = false;
   
-  if (targetRepsInput) {
-    const newTargetReps = parseInt(targetRepsInput.value);
-    if (newTargetReps > 0 && newTargetReps !== getTargetReps()) {
-      setTargetReps(newTargetReps);
+  if (repsPerSetInput) {
+    const newRepsPerSet = parseInt(repsPerSetInput.value);
+    if (newRepsPerSet > 0 && newRepsPerSet !== getRepsPerSet()) {
+      setRepsPerSet(newRepsPerSet);
       updated = true;
     }
   }
   
-  if (calorieGoalInput) {
-    const newCalorieGoal = parseFloat(calorieGoalInput.value);
-    if (newCalorieGoal > 0 && newCalorieGoal !== getCalorieGoal()) {
-      setCalorieGoal(newCalorieGoal);
+  if (numberOfSetsInput) {
+    const newNumberOfSets = parseInt(numberOfSetsInput.value);
+    if (newNumberOfSets > 0 && newNumberOfSets !== getNumberOfSets()) {
+      setNumberOfSets(newNumberOfSets);
       updated = true;
     }
   }
@@ -65,8 +65,8 @@ export function saveSettings() {
   if (updated) {
     // Save to localStorage
     const settings = {
-      targetReps: getTargetReps(),
-      calorieGoal: getCalorieGoal()
+      repsPerSet: getRepsPerSet(),
+      numberOfSets: getNumberOfSets()
     };
     localStorage.setItem('fittracker-settings', JSON.stringify(settings));
     
@@ -84,8 +84,8 @@ export function initializeSettings() {
   if (savedSettings) {
     try {
       const settings = JSON.parse(savedSettings);
-      if (settings.targetReps) setTargetReps(settings.targetReps);
-      if (settings.calorieGoal) setCalorieGoal(settings.calorieGoal);
+      if (settings.repsPerSet) setRepsPerSet(settings.repsPerSet);
+      if (settings.numberOfSets) setNumberOfSets(settings.numberOfSets);
     } catch (error) {
       console.warn('Failed to parse saved settings:', error);
     }

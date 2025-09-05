@@ -21,7 +21,7 @@ import { exerciseData } from './constants.js';
 import { speak } from './utils.js';
 import { updateFeedback, toggleTheme, toggleMute } from './ui.js';
 import { startCamera, stopCamera } from './camera.js';
-import { resetSession, startWorkoutFlow } from './workoutFlow.js';
+import { resetSession, startWorkoutFlow, startWorkout } from './workoutFlow.js';
 import { initializeFocusMode } from './focusMode.js';
 import { initializeSettingsListeners } from './settings.js';
 
@@ -106,19 +106,11 @@ function initializeModalControls() {
   }
   
   if (skipDemoBtn) {
-    skipDemoBtn.addEventListener('click', () => {
-      const { closeDemoModal } = require('./workoutFlow.js');
-      closeDemoModal();
-      startCamera();
-    });
+    skipDemoBtn.addEventListener('click', startWorkout);
   }
   
   if (startAfterDemoBtn) {
-    startAfterDemoBtn.addEventListener('click', () => {
-      const { closeDemoModal } = require('./workoutFlow.js');
-      closeDemoModal();
-      startCamera();
-    });
+    startAfterDemoBtn.addEventListener('click', startWorkout);
   }
 }
 

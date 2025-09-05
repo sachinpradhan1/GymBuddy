@@ -4,8 +4,12 @@ import {
   getCurrentExercise,
   getExercisePhase,
   setWorkoutState,
-  getTargetReps,
-  getRepCount
+  getRepCount,
+  getRepsPerSet,
+  getNumberOfSets,
+  getCurrentSet,
+  setCurrentSet,
+  setRepCount
 } from './state.js';
 import { calculateAngle, smoothAngle, incrementRep, speak } from './utils.js';
 import { updateFeedback, updateStats } from './ui.js';
@@ -36,12 +40,35 @@ export function processExercise(landmarks) {
 // Check if workout is complete
 function checkWorkoutCompletion() {
   const repCount = getRepCount();
-  const targetReps = getTargetReps();
-  
-  if (repCount >= targetReps && getWorkoutState() === 'active') {
-    setWorkoutState('finished');
-    updateFeedback("Workout Complete!", `Amazing! ${targetReps} reps completed!`, "fas fa-trophy");
-    speak(`Congratulations! Workout completed! You dominated those ${targetReps} reps.`);
+  const repsPerSet = getRepsPerSet();
+  const numberOfSets = getNumberOfSets();
+  const currentSet = getCurrentSet();
+
+  if (getWorkoutState() !== 'active') return;
+
+  if (repCount >= repsPerSet) {
+    if (currentSet < numberOfSets) {
+      // Start next set
+      setCurrentSet(currentSet + 1);
+      setRepCount(0);
+      setWorkoutState('paused'); // Pause briefly between sets
+      updateFeedback(`Set ${currentSet} Complete!`, `Get ready for set ${currentSet + 1}`, "fas fa-flag-checkered");
+      speak(`Set ${currentSet} complete. Take a short break.`);
+
+      // Resume after a short break (e.g., 10 seconds)
+      setTimeout(() => {
+        setWorkoutState('active');
+        updateFeedback(`Set ${currentSet + 1}`, "Let's go!", "fas fa-play-circle");
+        speak(`Starting set ${currentSet + 1}!`);
+      }, 10000); // 10-second rest
+
+    } else {
+      // All sets complete
+      setWorkoutState('finished');
+      const totalReps = repsPerSet * numberOfSets;
+      updateFeedback("Workout Complete!", `Amazing! ${totalReps} reps completed!`, "fas fa-trophy");
+      speak(`Congratulations! Workout completed! You dominated all ${numberOfSets} sets.`);
+    }
   }
 }
 
