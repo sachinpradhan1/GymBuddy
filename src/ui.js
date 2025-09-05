@@ -26,12 +26,14 @@ import {
   getTotalReps,
   getTotalCalories,
   getFormScore,
-  getTargetReps,
   getIsFocusMode,
   getIsMuted,
   setIsMuted,
   getDailyStats,
-  getCalorieGoal
+  getCalorieGoal,
+  getRepsPerSet,
+  getNumberOfSets,
+  getCurrentSet
 } from './state.js';
 
 import { checkDailyGoals } from './utils.js';
@@ -43,12 +45,14 @@ export function updateStats() {
   const totalReps = getTotalReps();
   const totalCalories = getTotalCalories();
   const formScore = getFormScore();
-  const targetReps = getTargetReps();
+  const repsPerSet = getRepsPerSet();
+  const currentSet = getCurrentSet();
+  const numberOfSets = getNumberOfSets();
   
   const roundedSessionCalories = Math.round(sessionCalories * 10) / 10;
   const roundedTotalCalories = Math.round(totalCalories * 10) / 10;
   const roundedFormScore = Math.round(formScore);
-  const progress = Math.min((repCount / targetReps) * 100, 100);
+  const progress = Math.min((repCount / repsPerSet) * 100, 100);
 
   // Main UI updates
   if (currentRepsElement) currentRepsElement.textContent = repCount;
@@ -57,7 +61,7 @@ export function updateStats() {
   if (totalCaloriesElement) totalCaloriesElement.textContent = roundedTotalCalories;
   if (formScoreElement) formScoreElement.textContent = roundedFormScore;
   if (progressFillElement) progressFillElement.style.width = `${progress}%`;
-  if (progressTextElement) progressTextElement.textContent = `${repCount}/${targetReps}`;
+  if (progressTextElement) progressTextElement.textContent = `Set ${currentSet}/${numberOfSets} | Reps ${repCount}/${repsPerSet}`;
 
   // Focus Mode UI updates
   if (getIsFocusMode()) {
@@ -65,7 +69,7 @@ export function updateStats() {
     if (focusCurrentCalories) focusCurrentCalories.textContent = roundedSessionCalories;
     if (focusFormScore) focusFormScore.textContent = roundedFormScore;
     if (focusProgressFill) focusProgressFill.style.width = `${progress}%`;
-    if (focusProgressText) focusProgressText.textContent = `${repCount}/${targetReps}`;
+    if (focusProgressText) focusProgressText.textContent = `Set ${currentSet}/${numberOfSets} | Reps ${repCount}/${repsPerSet}`;
   }
 
   // Update form score color based on value
