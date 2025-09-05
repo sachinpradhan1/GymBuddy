@@ -252,10 +252,48 @@
     </div>
   </div>
 
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settings-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Workout Settings</h2>
+        <button class="modal-close" id="close-settings">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-content">
+        <div class="settings-form">
+          <div class="form-group">
+            <label for="target-reps-input">Target Reps per Session</label>
+            <input type="number" id="target-reps-input" min="5" max="100" value="20">
+            <small>Set your goal for each workout session</small>
+          </div>
+          
+          <div class="form-group">
+            <label for="calorie-goal-input">Daily Calorie Goal</label>
+            <input type="number" id="calorie-goal-input" min="10" max="500" step="0.1" value="50">
+            <small>Your daily calorie burn target</small>
+          </div>
+        </div>
+        
+        <div class="modal-actions">
+          <button class="btn btn-primary" id="save-settings">
+            <i class="fas fa-save"></i>
+            Save Settings
+          </button>
+          <button class="btn btn-outline" id="close-settings-alt">
+            <i class="fas fa-times"></i>
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
-  <script src="script.js"></script>
+  <script type="module" src="src/main.js"></script>
 </body>
 </html>
