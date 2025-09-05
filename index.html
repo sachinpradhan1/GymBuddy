@@ -39,6 +39,9 @@
           <button class="btn-icon" id="mute-btn" title="Mute">
             <i class="fas fa-volume-up"></i>
           </button>
+          <button class="btn-icon" id="settings-btn" title="Settings">
+            <i class="fas fa-cog"></i>
+          </button>
         </div>
       </div>
     </header>
@@ -252,10 +255,48 @@
     </div>
   </div>
 
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settings-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Workout Settings</h2>
+        <button class="modal-close" id="close-settings">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-content">
+        <div class="settings-form">
+          <div class="form-group">
+            <label for="reps-per-set-input">Reps per Set</label>
+            <input type="number" id="reps-per-set-input" min="5" max="50" value="10">
+            <small>Number of repetitions in each set (5-50)</small>
+          </div>
+          
+          <div class="form-group">
+            <label for="number-of-sets-input">Number of Sets</label>
+            <input type="number" id="number-of-sets-input" min="1" max="10" value="3">
+            <small>Number of sets to complete (1-10)</small>
+          </div>
+        </div>
+        
+        <div class="modal-actions">
+          <button class="btn btn-primary" id="save-settings">
+            <i class="fas fa-save"></i>
+            Save Settings
+          </button>
+          <button class="btn btn-outline" id="close-settings-alt">
+            <i class="fas fa-times"></i>
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
-  <script src="script.js"></script>
+  <script type="module" src="src/main.js"></script>
 </body>
 </html>

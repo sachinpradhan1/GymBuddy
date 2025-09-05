@@ -654,6 +654,47 @@ Modal
 }
 
 /* ---
+Settings Form
+--- */
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.form-group input {
+  padding: 0.75rem;
+  border: 1px solid var(--bg-tertiary);
+  border-radius: 6px;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.form-group small {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+/* ---
 Footer
 --- */
 .footer {
