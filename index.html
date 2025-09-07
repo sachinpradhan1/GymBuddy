@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,6 +39,9 @@
           <button class="btn-icon" id="mute-btn" title="Mute">
             <i class="fas fa-volume-up"></i>
           </button>
+          <button class="btn-icon" id="settings-btn" title="Settings">
+            <i class="fas fa-cog"></i>
+          </button>
         </div>
       </div>
     </header>
@@ -52,7 +54,7 @@
           <h2>Exercises</h2>
           <p>Choose your workout</p>
         </div>
-        
+
         <div class="exercise-list">
           <div class="exercise-card active" data-exercise="curl">
             <div class="exercise-icon">
@@ -85,7 +87,7 @@
               <i class="fas fa-hand-point-up"></i>
             </div>
             <div class="exercise-details">
-              <h3>Push-ups</h3>
+              <h3>Push up</h3>
               <p>Chest & triceps</p>
               <div class="exercise-meta">
                 <span><i class="fas fa-fire"></i> 0.7 cal/rep</span>
@@ -106,18 +108,6 @@
             </div>
           </div>
 
-          <div class="exercise-card" data-exercise="jumpingjack">
-            <div class="exercise-icon">
-              <i class="fas fa-star"></i>
-            </div>
-            <div class="exercise-details">
-              <h3>Jumping Jacks</h3>
-              <p>Full body cardio</p>
-              <div class="exercise-meta">
-                <span><i class="fas fa-fire"></i> 0.9 cal/rep</span>
-              </div>
-            </div>
-          </div>
         </div>
       </aside>
 
@@ -139,8 +129,43 @@
                 <i class="fas fa-user"></i>
               </div>
             </div>
+
+            <!-- Focus Mode Overlay Stats -->
+            <div class="focus-mode-overlay" id="focus-mode-overlay">
+              <div class="focus-stats">
+                <div class="focus-stat-item">
+                  <div class="focus-stat-value" id="focus-current-reps">0</div>
+                  <div class="focus-stat-label">Current Reps</div>
+                </div>
+                <div class="focus-stat-item">
+                  <div class="focus-stat-value" id="focus-current-calories">0</div>
+                  <div class="focus-stat-label">Session Calories</div>
+                </div>
+                <div class="focus-stat-item">
+                  <div class="focus-stat-value" id="focus-form-score">100</div>
+                  <div class="focus-stat-label">Form Score</div>
+                </div>
+              </div>
+
+              <div class="focus-progress">
+                <div class="focus-progress-text" id="focus-progress-text">0/20</div>
+                <div class="focus-progress-bar">
+                  <div class="focus-progress-fill" id="focus-progress-fill"></div>
+                </div>
+              </div>
+
+              <div class="focus-feedback" id="focus-feedback">
+                <div class="focus-feedback-title" id="focus-feedback-title">Ready to Start</div>
+                <div class="focus-feedback-message" id="focus-feedback-message">Select an exercise and begin your workout</div>
+              </div>
+
+              <button class="focus-exit-btn" id="focus-exit-btn">
+                <i class="fas fa-compress"></i>
+                Exit Focus
+              </button>
+            </div>
           </div>
-          
+
           <!-- Live Stats -->
           <div class="live-stats">
             <div class="stat-box">
@@ -169,7 +194,7 @@
               <p id="feedback-message">Select an exercise and begin your workout</p>
             </div>
           </div>
-          
+
           <div class="progress-section">
             <div class="progress-header">
               <span>Progress</span>
@@ -230,10 +255,48 @@
     </div>
   </div>
 
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settings-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Workout Settings</h2>
+        <button class="modal-close" id="close-settings">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-content">
+        <div class="settings-form">
+          <div class="form-group">
+            <label for="reps-per-set-input">Reps per Set</label>
+            <input type="number" id="reps-per-set-input" min="5" max="50" value="10">
+            <small>Number of repetitions in each set (5-50)</small>
+          </div>
+          
+          <div class="form-group">
+            <label for="number-of-sets-input">Number of Sets</label>
+            <input type="number" id="number-of-sets-input" min="1" max="10" value="3">
+            <small>Number of sets to complete (1-10)</small>
+          </div>
+        </div>
+        
+        <div class="modal-actions">
+          <button class="btn btn-primary" id="save-settings">
+            <i class="fas fa-save"></i>
+            Save Settings
+          </button>
+          <button class="btn btn-outline" id="close-settings-alt">
+            <i class="fas fa-times"></i>
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
-  <script src="script.js"></script>
+  <script type="module" src="src/main.js"></script>
 </body>
 </html>
